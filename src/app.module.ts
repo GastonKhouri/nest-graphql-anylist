@@ -3,9 +3,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
+import { ApolloDriver } from '@nestjs/apollo';
 import { JwtService } from '@nestjs/jwt';
+
+import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 
 import { ItemsModule } from './items/items.module';
 import { UsersModule } from './users/users.module';

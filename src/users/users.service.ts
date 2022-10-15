@@ -3,8 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { UpdateUserInput } from './dto';
 import { SignupInput } from '../auth/dto/inputs/signup.input';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { User } from './entities/user.entity';

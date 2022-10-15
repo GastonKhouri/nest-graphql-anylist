@@ -11,10 +11,6 @@ export class CreateItemInput {
 	@Transform( ( { value } ) => value.trim() )
 	name: string;
 
-	@Field( () => Float )
-	@IsPositive()
-	quantity: number;
-
 	@Field( () => String, { nullable: true } )
 	@IsString()
 	@IsOptional()
