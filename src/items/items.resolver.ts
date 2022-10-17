@@ -1,11 +1,13 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ParseUUIDPipe, UseGuards } from '@nestjs/common';
 
-import { ItemsService } from './items.service';
 import { Item } from './entities/item.entity';
-import { UpdateItemInput, CreateItemInput } from './dto';
-import { CurrentUser } from '../auth/decorator/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+
+import { ItemsService } from './items.service';
+import { UpdateItemInput, CreateItemInput } from './dto';
+import { PaginationArgs, SearchArgs } from '../common/dto';
+import { CurrentUser } from '../auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Resolver( () => Item )
@@ -23,9 +25,11 @@ export class ItemsResolver {
 
 	@Query( () => [ Item ], { name: 'items' } )
 	findAll(
-		@CurrentUser() user: User
+		@CurrentUser() user: User,
+		@Args() paginationArgs: PaginationArgs,
+		@Args() searchArgs: SearchArgs
 	): Promise<Item[]> {
-		return this.itemsService.findAll( user );
+		return this.itemsService.findAll( user, paginationArgs, searchArgs );
 	}
 
 	@Query( () => Item, { name: 'item' } )

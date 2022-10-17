@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { UpdateUserInput } from './dto';
+import { PaginationArgs, SearchArgs } from '../common/dto';
+
 import { SignupInput } from '../auth/dto/inputs/signup.input';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
 import { User } from './entities/user.entity';
@@ -39,15 +41,36 @@ export class UsersService {
 
 	}
 
-	async findAll( roles: ValidRoles[] ): Promise<User[]> {
+	async findAll(
+		roles: ValidRoles[],
+		paginationArgs: PaginationArgs,
+		searchArgs: SearchArgs
+	): Promise<User[]> {
+
+		const { limit, offset } = paginationArgs;
+		const { search } = searchArgs;
+
+		const queryBuilder = this.usersRepository.createQueryBuilder()
+			.take( limit )
+			.skip( offset );
+
+		if ( search ) {
+			queryBuilder
+				.orWhere(
+					'LOWER(fullname) LIKE :search', { search: `%${ search.toLowerCase() }%` }
+				)
+				.orWhere(
+					'LOWER(email) LIKE :search', { search: `%${ search.toLowerCase() }%` }
+				);
+		}
 
 		try {
 
 			if ( roles.length === 0 ) {
-				return await this.usersRepository.find();
+				return await queryBuilder.getMany();
 			}
 
-			return await this.usersRepository.createQueryBuilder()
+			return await queryBuilder
 				.andWhere( 'ARRAY[roles] && ARRAY[:...roles]', { roles } )
 				.getMany();
 
