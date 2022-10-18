@@ -16,11 +16,9 @@ export class ItemsService {
 		private readonly itemsRepository: Repository<Item>,
 	) { }
 
-	async create( createItemInput: CreateItemInput, createdBy: User ): Promise<Item> {
+	async create( createItemInput: CreateItemInput, user: User ): Promise<Item> {
 
-		const newItem = this.itemsRepository.create( createItemInput );
-
-		newItem.user = createdBy;
+		const newItem = this.itemsRepository.create( { ...createItemInput, user } );
 
 		await this.itemsRepository.save( newItem );
 
@@ -57,22 +55,24 @@ export class ItemsService {
 			);
 		}
 
-		const items = await queryBuilder.getMany();
-
-		return items;
+		return await queryBuilder.getMany();
 
 	}
 
 	async findOne( id: string, user: User ): Promise<Item> {
 
-		const item = await this.itemsRepository.findOneBy( {
-			id,
-			user: { id: user.id }
-		} );
+		try {
 
-		if ( !item ) throw new NotFoundException( `Item #${ id } not found` );
+			const item = await this.itemsRepository.findOneByOrFail( {
+				id,
+				user: { id: user.id }
+			} );
 
-		return item;
+			return item;
+
+		} catch ( error ) {
+			throw new NotFoundException( `${ id } not found` );
+		}
 
 	}
 
@@ -81,8 +81,6 @@ export class ItemsService {
 		await this.findOne( id, user );
 
 		const updatedItem = await this.itemsRepository.preload( updateItemInput );
-
-		if ( !updatedItem ) throw new NotFoundException( `Item #${ id } not found` );
 
 		await this.itemsRepository.save( updatedItem );
 
@@ -94,9 +92,9 @@ export class ItemsService {
 
 		const item = await this.findOne( id, user );
 
-		this.itemsRepository.remove( item );
+		await this.itemsRepository.remove( item );
 
-		return item;
+		return { ...item, user };
 
 	}
 

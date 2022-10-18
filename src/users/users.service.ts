@@ -106,7 +106,7 @@ export class UsersService {
 			return user;
 
 		} catch ( error ) {
-			throw new NotFoundException( `${ id } not found` );
+			throw new NotFoundException( `User ${ id } not found` );
 		}
 
 	}
